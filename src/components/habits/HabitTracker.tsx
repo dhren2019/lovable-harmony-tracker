@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { Check } from 'lucide-react';
 import { Habit, HabitCategory } from '@/lib/types';
 import { categoryColors, mockHabits } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 const HabitTracker: React.FC = () => {
   const [habits, setHabits] = useState<Habit[]>(mockHabits);

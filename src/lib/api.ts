@@ -1,6 +1,6 @@
 
 import { Reflection, Habit, ProgressData, HabitCategory } from './types';
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 const WEBHOOK_URL = 'https://lovable.app.n8n.cloud/webhook-test/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
 

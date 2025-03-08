@@ -4,7 +4,7 @@ import { Reflection } from '@/lib/types';
 import { submitReflection, mockReflections } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 import { Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 

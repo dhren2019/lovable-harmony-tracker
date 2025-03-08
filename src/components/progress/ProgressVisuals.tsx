@@ -104,6 +104,9 @@ const ProgressVisuals: React.FC = () => {
                   <Label
                     position="top"
                     content={({ x, y, width, height, value }) => {
+                      if (typeof x !== 'number' || typeof width !== 'number' || typeof y !== 'number') {
+                        return null;
+                      }
                       return (
                         <text
                           x={x + width / 2}
