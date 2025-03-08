@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { NavItem } from '@/lib/types';
 import { 
   Home, 
@@ -9,10 +9,13 @@ import {
   UserPlus, 
   Settings,
   Menu,
-  X
+  X,
+  User
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useClients } from '@/contexts/ClientContext';
+import AddClientDialog from '@/components/clients/AddClientDialog';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -20,6 +23,9 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, toggleSidebar }) => {
+  const [isAddClientOpen, setIsAddClientOpen] = useState(false);
+  const { clients } = useClients();
+  
   const navItems: NavItem[] = [
     { label: 'Dashboard', icon: Home, href: '/', active: true },
     { label: 'Reflections', icon: BookOpen, href: '/reflections' },
@@ -55,6 +61,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, toggleSidebar }) => {
               "w-full bg-lovable-pink text-primary-foreground hover:bg-lovable-pink/90 transition-all",
               isCollapsed ? "p-2 justify-center" : "px-4 py-2 justify-start gap-2"
             )}
+            onClick={() => setIsAddClientOpen(true)}
           >
             <UserPlus size={isCollapsed ? 24 : 20} />
             {!isCollapsed && <span>Add Client</span>}
@@ -79,6 +86,33 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, toggleSidebar }) => {
               </li>
             ))}
           </ul>
+          
+          {/* Sección de clientes */}
+          {clients.length > 0 && (
+            <div className="mt-6">
+              {!isCollapsed && (
+                <h3 className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                  Clientes:
+                </h3>
+              )}
+              <ul className="space-y-1 px-2">
+                {clients.map((client) => (
+                  <li key={client.id}>
+                    <a
+                      href={`/client/${client.id}`}
+                      className={cn(
+                        "sidebar-link",
+                        isCollapsed && "justify-center px-2"
+                      )}
+                    >
+                      <User size={20} />
+                      {!isCollapsed && <span>{client.name}</span>}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </nav>
         
         <div className="p-4 border-t border-gray-100">
@@ -102,6 +136,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, toggleSidebar }) => {
           onClick={toggleSidebar}
         />
       )}
+      
+      {/* Diálogo para añadir clientes */}
+      <AddClientDialog 
+        open={isAddClientOpen} 
+        onOpenChange={setIsAddClientOpen} 
+      />
     </>
   );
 };
