@@ -1,5 +1,5 @@
 
-import { Reflection } from './types';
+import { Reflection, Habit, ProgressData, HabitCategory } from './types';
 import { toast } from "@/components/ui/sonner";
 
 const WEBHOOK_URL = 'https://lovable.app.n8n.cloud/webhook-test/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
@@ -67,7 +67,7 @@ export const mockReflections = [
     content: 'Today I felt anxious about my upcoming presentation, but I practiced deep breathing which helped me calm down.', 
     date: '2023-05-10T10:30:00Z',
     sentiment: 'mixed',
-    aiResponse: 'It sounds like you're experiencing normal presentation anxiety. Your use of deep breathing is an excellent coping strategy. Consider visualizing a successful presentation outcome and remember that preparation reduces anxiety.'
+    aiResponse: 'It sounds like you\'re experiencing normal presentation anxiety. Your use of deep breathing is an excellent coping strategy. Consider visualizing a successful presentation outcome and remember that preparation reduces anxiety.'
   },
   { 
     id: '2', 
