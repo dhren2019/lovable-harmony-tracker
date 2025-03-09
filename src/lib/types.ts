@@ -49,3 +49,19 @@ export type NavItem = {
   href: string;
   active?: boolean;
 };
+
+export type NutritionPlanSection = {
+  title: string;
+  content: string;
+  icon: string;
+};
+
+export type NutritionPlan = {
+  title: string;
+  greeting: string;
+  sections: NutritionPlanSection[];
+  closing: {
+    message: string;
+    icon: string;
+  };
+};

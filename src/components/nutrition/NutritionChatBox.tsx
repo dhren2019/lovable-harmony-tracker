@@ -4,19 +4,50 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send } from 'lucide-react';
 import { toast } from "sonner";
+import { NutritionPlan } from '@/lib/types';
+import NutritionPlanDisplay from './NutritionPlanDisplay';
 
 interface NutritionChatBoxProps {
   clientId: string;
+  clientName?: string;
 }
 
 interface WebhookResponse {
   response: string;
 }
 
-const NutritionChatBox: React.FC<NutritionChatBoxProps> = ({ clientId }) => {
+const NutritionChatBox: React.FC<NutritionChatBoxProps> = ({ clientId, clientName = "Cliente" }) => {
   const [prompt, setPrompt] = useState('');
   const [response, setResponse] = useState<string | null>(null);
+  const [nutritionPlan, setNutritionPlan] = useState<NutritionPlan | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const parseNutritionPlan = (responseText: string): NutritionPlan | null => {
+    try {
+      // First, try to parse the entire response as JSON
+      const plan = JSON.parse(responseText) as NutritionPlan;
+      if (plan.title && plan.sections) {
+        return plan;
+      }
+    } catch (e) {
+      console.log('Response is not directly parseable as JSON, trying to extract JSON...');
+      
+      // Try to extract JSON from text (it might be surrounded by markdown code blocks or other text)
+      try {
+        const jsonMatch = responseText.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
+        if (jsonMatch && jsonMatch[1]) {
+          const extractedJson = jsonMatch[1];
+          const plan = JSON.parse(extractedJson) as NutritionPlan;
+          if (plan.title && plan.sections) {
+            return plan;
+          }
+        }
+      } catch (extractError) {
+        console.error('Failed to extract JSON from response:', extractError);
+      }
+    }
+    return null;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,8 +114,19 @@ const NutritionChatBox: React.FC<NutritionChatBoxProps> = ({ clientId }) => {
         throw new Error('Missing response data from webhook');
       }
       
-      // Set the response and reset the prompt
+      // Set the text response
       setResponse(data.response);
+      
+      // Try to parse the nutrition plan from the response
+      const plan = parseNutritionPlan(data.response);
+      if (plan) {
+        console.log('Successfully parsed nutrition plan:', plan);
+        setNutritionPlan(plan);
+      } else {
+        console.warn('Could not parse a valid nutrition plan from the response');
+      }
+      
+      // Reset the prompt and show success message
       setPrompt('');
       toast.success("Plan de nutrición generado correctamente");
     } catch (error) {
@@ -129,6 +171,13 @@ const NutritionChatBox: React.FC<NutritionChatBoxProps> = ({ clientId }) => {
               const data = await checkResponse.json();
               if (data.response) {
                 setResponse(data.response);
+                
+                // Try to parse the nutrition plan
+                const plan = parseNutritionPlan(data.response);
+                if (plan) {
+                  setNutritionPlan(plan);
+                }
+                
                 toast.success("Plan de nutrición generado correctamente");
               }
             }
@@ -172,14 +221,19 @@ const NutritionChatBox: React.FC<NutritionChatBoxProps> = ({ clientId }) => {
         </Button>
       </form>
       
-      {response && (
+      {nutritionPlan ? (
+        <div className="mt-6">
+          <h3 className="text-lg font-semibold mb-4">Plan de Nutrición Generado:</h3>
+          <NutritionPlanDisplay plan={nutritionPlan} clientName={clientName} />
+        </div>
+      ) : response ? (
         <div className="mt-6">
           <h3 className="text-lg font-semibold mb-2">Plan de Nutrición Generado:</h3>
           <div className="bg-gray-50 p-4 rounded-md whitespace-pre-wrap text-sm">
             {response}
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 };
