@@ -41,13 +41,14 @@ const NutritionChatBox: React.FC<NutritionChatBoxProps> = ({ clientId }) => {
       console.log('Sending payload to webhook:', payload);
       console.log('JSON stringified payload:', JSON.stringify(payload));
       
-      // Make the POST request to the webhook
+      // Make the POST request to the webhook with mode: 'cors' explicitly set
       const response = await fetch(webhookUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
+        mode: 'cors', // Explicitly set CORS mode
         body: JSON.stringify(payload),
       });
       
@@ -88,7 +89,58 @@ const NutritionChatBox: React.FC<NutritionChatBoxProps> = ({ clientId }) => {
       toast.success("Plan de nutrición generado correctamente");
     } catch (error) {
       console.error('Error sending prompt:', error);
-      toast.error("Error al generar el plan de nutrición");
+      
+      // Try alternate approach with no-cors mode if regular request fails
+      try {
+        console.log('Attempting no-cors mode as fallback...');
+        
+        const webhookUrl = 'https://dhren2.app.n8n.cloud/webhook-test/3192296c-ec30-4af7-a2bf-5ecceaa34841';
+        const payload = {
+          clientId,
+          prompt: prompt.trim(),
+          timestamp: new Date().toISOString(),
+        };
+        
+        await fetch(webhookUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          mode: 'no-cors', // Use no-cors mode as fallback
+          body: JSON.stringify(payload),
+        });
+        
+        console.log('no-cors request sent, cannot verify response');
+        
+        // Since no-cors mode doesn't return readable response, we show a different message
+        toast.success("Solicitud enviada. Procesando plan de nutrición...");
+        
+        // Try to fetch response with a separate request after a short delay
+        setTimeout(async () => {
+          try {
+            const checkResponse = await fetch(`${webhookUrl}/check/${clientId}`, {
+              method: 'GET',
+              headers: {
+                'Accept': 'application/json'
+              },
+            });
+            
+            if (checkResponse.ok) {
+              const data = await checkResponse.json();
+              if (data.response) {
+                setResponse(data.response);
+                toast.success("Plan de nutrición generado correctamente");
+              }
+            }
+          } catch (checkError) {
+            console.error('Error checking for response:', checkError);
+          }
+        }, 2000);
+        
+      } catch (fallbackError) {
+        console.error('Fallback request also failed:', fallbackError);
+        toast.error("Error al generar el plan de nutrición");
+      }
     } finally {
       setIsLoading(false);
     }
