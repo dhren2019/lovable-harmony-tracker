@@ -31,16 +31,21 @@ const NutritionChatBox: React.FC<NutritionChatBoxProps> = ({ clientId }) => {
     try {
       const webhookUrl = 'https://dhren2.app.n8n.cloud/webhook-test/3192296c-ec30-4af7-a2bf-5ecceaa34841';
       
+      // Log the data being sent for debugging
+      const payload = {
+        clientId,
+        prompt: prompt.trim(), // Ensure prompt is trimmed
+        timestamp: new Date().toISOString(),
+      };
+      
+      console.log('Sending payload to webhook:', payload);
+      
       const response = await fetch(webhookUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          clientId,
-          prompt,
-          timestamp: new Date().toISOString(),
-        }),
+        body: JSON.stringify(payload),
       });
       
       if (!response.ok) {
@@ -48,6 +53,8 @@ const NutritionChatBox: React.FC<NutritionChatBoxProps> = ({ clientId }) => {
       }
       
       const data = await response.json() as WebhookResponse;
+      console.log('Webhook response:', data);
+      
       setResponse(data.response);
       setPrompt('');
       toast.success("Plan de nutrición generado correctamente");
