@@ -31,30 +31,58 @@ const NutritionChatBox: React.FC<NutritionChatBoxProps> = ({ clientId }) => {
     try {
       const webhookUrl = 'https://dhren2.app.n8n.cloud/webhook-test/3192296c-ec30-4af7-a2bf-5ecceaa34841';
       
-      // Log the data being sent for debugging
+      // Create the payload with the required data
       const payload = {
         clientId,
-        prompt: prompt.trim(), // Ensure prompt is trimmed
+        prompt: prompt.trim(),
         timestamp: new Date().toISOString(),
       };
       
       console.log('Sending payload to webhook:', payload);
+      console.log('JSON stringified payload:', JSON.stringify(payload));
       
+      // Make the POST request to the webhook
       const response = await fetch(webhookUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify(payload),
       });
       
+      // Log the raw response for debugging
+      console.log('Webhook response status:', response.status);
+      console.log('Webhook response headers:', Object.fromEntries(response.headers.entries()));
+      
+      // Check if the response is ok (status code 200-299)
       if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
+        const errorText = await response.text();
+        console.error('Error response from webhook:', errorText);
+        throw new Error(`Error: ${response.status} - ${errorText || response.statusText}`);
       }
       
-      const data = await response.json() as WebhookResponse;
-      console.log('Webhook response:', data);
+      // Parse the JSON response
+      const responseText = await response.text();
+      console.log('Raw response text:', responseText);
       
+      let data: WebhookResponse;
+      try {
+        data = JSON.parse(responseText) as WebhookResponse;
+      } catch (parseError) {
+        console.error('Error parsing JSON:', parseError);
+        console.log('Invalid JSON response:', responseText);
+        throw new Error('Invalid response format from webhook');
+      }
+      
+      console.log('Parsed webhook response:', data);
+      
+      if (!data.response) {
+        console.error('No response field in webhook data:', data);
+        throw new Error('Missing response data from webhook');
+      }
+      
+      // Set the response and reset the prompt
       setResponse(data.response);
       setPrompt('');
       toast.success("Plan de nutrición generado correctamente");
