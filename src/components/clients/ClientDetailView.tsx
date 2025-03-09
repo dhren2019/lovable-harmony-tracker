@@ -4,6 +4,7 @@ import { useClients } from '@/contexts/ClientContext';
 import ClientTopbar from './ClientTopbar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Leaf, Activity, Dumbbell } from 'lucide-react';
+import NutritionPlanView from '@/components/nutrition/NutritionPlanView';
 
 interface ClientDetailViewProps {
   clientId?: string;
@@ -40,12 +41,7 @@ const ClientDetailView: React.FC<ClientDetailViewProps> = ({ clientId }) => {
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsContent value="nutrition" className="mt-6">
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h2 className="text-xl font-semibold mb-4">Plan de Nutrición</h2>
-            <p className="text-gray-600">
-              No hay plan de nutrición definido para este cliente aún.
-            </p>
-          </div>
+          <NutritionPlanView clientId={client.id} />
         </TabsContent>
         
         <TabsContent value="tracking" className="mt-6">
